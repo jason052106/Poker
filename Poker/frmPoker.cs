@@ -28,6 +28,9 @@ namespace Poker
         /// </summary>
         int[] playerPoker = new int[5];
 
+        int totalFunds = 1000000; // 初始總資金100w
+        int currentBet = 500; // 預設押注金額 500
+
         #endregion
 
         public frmPoker()
@@ -35,6 +38,13 @@ namespace Poker
 
             InitializeComponent();
             InitializePoker();
+
+            lblTotalFunds.Text = totalFunds.ToString();
+            txtBetMoney.Text = currentBet.ToString();
+
+            btnDealCard.Enabled = false;
+            btnChangeCard.Enabled = false;
+            btnCheck.Enabled = false;
         }
 
 
@@ -335,52 +345,80 @@ namespace Poker
             bool isOnePair = (pointCount[0] == 2 && pointCount[1] == 1);
 
             string result = "";
+            int odds = 0;
 
             if (isRoyalisFlush)
             {
                 result = $"{colorList[0]} 同花大順";
+                odds = 250;
             }
             else if (isStraightFlush)
             {
                 result = $"{colorList[0]} 同花順";
+                odds = 50;
             }
             else if (isStraight)
             {
                 result = "順子";
+                odds = 4;
             }
             else if (isFourOfAKind)
             {
                 result = $"{pointList[0]} 鐵支";
+                odds = 25;
             }
             else if (isFullHouse)
             {
                 result = $"{pointList[0]}三張{pointList[1]}兩張 葫蘆";
+                odds = 9;
             }
             else if (isFlush)
             {
                 result = $"{colorList[0]} 同花";
+                odds = 6;
             }
             else if (isThreeOfAKind)
             {
                 result = $"{pointList[0]} 三條";
+                odds = 3;
             }
             else if (isTwoPair)
             {
                 result = $"{pointList[0]},{pointList[1]} 兩對";
+                odds = 2;
             }
             else if (isOnePair)
             {
                 result = $"{pointList[0]} 一對";
+                odds = 1;
             }
             else
             {
                 result = "雜牌";
+                odds = 0;
             }
+
+            int winMoney = currentBet * odds;
+            totalFunds += winMoney;
+
+            if (odds > 0)
+            {
+                result += $" 恭喜中獎！賠率 {odds} 倍，贏得 {winMoney} 元";
+            }
+            else
+            {
+                result += " 未中獎，請再接再厲！";
+            }
+
             lblResult.Text = result;
             btnChangeCard.Enabled = false;
             btnCheck.Enabled = false;
+            btnDealCard.Enabled = false;
+            lblTotalFunds.Text = totalFunds.ToString();
 
-            btnDealCard.Enabled = true;
+            // 開放重新下注
+            btnBet.Enabled = true;
+            txtBetMoney.Enabled = true;
         }
 
         /// <summary>
@@ -455,6 +493,41 @@ namespace Poker
         private void grpPoker_Enter(object sender, EventArgs e)
         {
 
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            // 檢查輸入的押注金額是否為正確的數字
+            if (int.TryParse(txtBetMoney.Text, out currentBet))
+            {
+                // 判斷押注金額是否大於0且沒有超過目前總資金
+                if (currentBet > 0 && currentBet <= totalFunds)
+                {
+                    // 扣除押注金額並更新畫面
+                    totalFunds -= currentBet;
+                    lblTotalFunds.Text = totalFunds.ToString();
+
+                    // 更新按鈕與介面狀態
+                    btnBet.Enabled = false;
+                    txtBetMoney.Enabled = false;
+                    btnDealCard.Enabled = true; // 開放發牌
+
+                    lblResult.Text = "押注成功，請點選「發牌」！";
+                }
+                else
+                {
+                    MessageBox.Show("押注金額必須大於 0，且不能超過總額！", "下注錯誤", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            else
+            {
+                MessageBox.Show("請輸入正確的數字格式！", "格式錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

@@ -51,6 +51,23 @@ namespace Poker
         #region 自定義方法
         private void InitializePoker()
         {
+            this.grpPoker.BackColor = Color.Transparent;
+            this.grpPoker.ForeColor = Color.Transparent;
+            foreach (Control control in this.grpPoker.Controls)
+            {
+                // 將 BackColor 設為透明。這會影響 PictureBox、其他 GroupBox、Label 等。
+                control.BackColor = Color.Transparent;
+
+                // 如果是大 GroupBox 裡面的另一個 GroupBox (例如 "下注" 或 "功能" 的 GroupBox)，
+                // 也需要將裡面的子控制項也設為透明，才能達到完全透明的效果。
+                if (control is GroupBox internalGroupBox)
+                {
+                    foreach (Control subControl in internalGroupBox.Controls)
+                    {
+                        subControl.BackColor = Color.Transparent;
+                    }
+                }
+            }
             for (int i = 0; i < pic.Length; i++)
             {
                 pic[i] = new PictureBox();
@@ -528,6 +545,11 @@ namespace Poker
             {
                 MessageBox.Show("請輸入正確的數字格式！", "格式錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void frmPoker_Load(object sender, EventArgs e)
+        {
+            
         }
     }
 }
